@@ -215,7 +215,7 @@ private:
 #endif
 
         for (std::size_t i = 0; i < prop_data.size() - 1; i++) {
-            _pim_obj->integrateMeasurement(prop_data[i], prop_data[i + 1]);
+            _pim_obj->integrateMeasurement(prop_data[i], prop_data[i + 1]); // <RTEN> pre-integration: integral calculation basedon acceleration and rotation </RTEN>
 
             prev_bias = bias;
             bias      = _pim_obj->biasHat();
