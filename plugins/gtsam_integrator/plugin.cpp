@@ -212,6 +212,9 @@ private:
 
 #ifndef NDEBUG
         spdlog::get(name)->debug("Integrating over {} IMU samples", prop_data.size());
+        //<RTEN>
+        [[maybe_unused]] time_point time_before = _m_clock->now();
+        //<RTEN/>
 #endif
 
         for (std::size_t i = 0; i < prop_data.size() - 1; i++) {
@@ -228,6 +231,12 @@ private:
         spdlog::get(name)->debug("Base Position (x, y, z) = {}, {}, {}", input_values->position(0), input_values->position(1),
                                  input_values->position(2));
         spdlog::get(name)->debug("New Position (x, y, z) = {}, {}, {}", out_pose.x(), out_pose.y(), out_pose.z());
+
+        //<RTEN>
+        [[maybe_unused]] time_point time_after = _m_clock->now();
+        double     time_duration         = duration2double<std::milli>(time_after - time_before);
+        spdlog::get(name)->debug("<RTEN> IMU Integration time: {} ms", time_duration);
+        //</RTEN>
 #endif
 
         auto                        seconds_since_epoch = std::chrono::duration<double>(real_time.time_since_epoch()).count();
