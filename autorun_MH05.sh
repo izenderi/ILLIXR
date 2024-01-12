@@ -9,10 +9,26 @@ fi
 # Number of times to execute the command
 n=$1
 
+# Base directory for experiments
+base_dir="exps"
+
+# Check if the base directory exists, if not, create it
+if [ ! -d "$base_dir" ]; then
+    mkdir -p "$base_dir"
+    echo "exps folder not exist. Created exps first"
+fi
+
+# Create a directory based on the experiment name and current time
+exp_name="MH05"
+current_time=$(date +"%Y%m%d-%H%M%S")
+log_dir="${base_dir}/${exp_name}_${current_time}"
+echo "Creating $log_dir for $n times of exps"
+mkdir -p "$log_dir"
+
 # Loop and execute the command n times, logging each execution to a separate file
 for (( i=1; i<=n; i++ ))
 do
-    logfile="log_MH05_${i}.txt"
+    logfile="${log_dir}/log_MH05_${i}.txt"
     echo "Starting exp$i..."
 
     # Special Variable SECONDS
@@ -22,4 +38,6 @@ do
 
     duration=$SECONDS
     echo "exp$i Finished in $duration seconds"
+    echo "Next exp starts in 10 seconds"
+    sleep 10
 done
