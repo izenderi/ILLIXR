@@ -15,6 +15,15 @@ using namespace ILLIXR;
 #define ViconRoom2Easy      1413393212225760512
 #define ViconRoom2Medium    1413393885975760384
 #define ViconRoom2Hard      1413394881555760384
+// <RTEN> added for Machine Hall series. 
+// See https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets Machine Hall 01 to 05
+#define MachineHall01       1403636580838555648
+#define MachineHall02       1403636859536666368
+#define MachineHall03       1403637132888318976
+#define MachineHall04       1403638128940097024
+#define MachineHall05       1403638519492829440
+// </RTEN>
+
 
 class ground_truth_slam : public plugin {
 public:
