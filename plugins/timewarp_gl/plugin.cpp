@@ -832,7 +832,7 @@ public:
 
     #ifndef NDEBUG // Timewarp only has vsync estimates if we're running with native-gl
 
-        if (log_count > LOG_PERIOD) {
+        if (log_count >= LOG_PERIOD) {
             const double     time_swap         = duration2double<std::milli>(time_after_swap - time_before_swap);
             const double     latency_mtd       = duration2double<std::milli>(imu_to_display);
             const double     latency_ptd       = duration2double<std::milli>(predict_to_display);
@@ -891,7 +891,7 @@ public:
         _m_hologram.put(_m_hologram.allocate<hologram_input>(hologram_input(++_hologram_seq)));
 
 #ifndef NDEBUG
-        if (log_count > LOG_PERIOD) {
+        if (log_count >= LOG_PERIOD) {
             log_count = 0;
         } else {
             log_count++;
@@ -928,7 +928,7 @@ public:
 
 #ifndef NDEBUG
     size_t log_count  = 0;
-    size_t LOG_PERIOD = 20;
+    size_t LOG_PERIOD = 0; // <RTEN> log every output frame
 #endif
 };
 

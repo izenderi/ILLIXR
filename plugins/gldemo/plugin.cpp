@@ -61,7 +61,7 @@ public:
         }
 
 #ifndef NDEBUG
-        if (log_count > LOG_PERIOD) {
+        if (log_count >= LOG_PERIOD) {
             double vsync_in = duration2double<std::milli>(**next_vsync - now);
             spdlog::get(name)->debug("First vsync is in {} ms", vsync_in);
         }
@@ -82,7 +82,7 @@ public:
             }
 
 #ifndef NDEBUG
-            if (log_count > LOG_PERIOD) {
+            if (log_count >= LOG_PERIOD) {
                 double wait_in = duration2double<std::milli>(wait_time - now);
                 spdlog::get(name)->debug("Waiting until next vsync, in {} ms", wait_in);
             }
@@ -93,7 +93,7 @@ public:
             std::this_thread::sleep_for(wait_time - now);
         } else {
 #ifndef NDEBUG
-            if (log_count > LOG_PERIOD) {
+            if (log_count >= LOG_PERIOD) {
                 spdlog::get(name)->debug("We haven't rendered yet, rendering immediately");
             }
 #endif
@@ -177,7 +177,7 @@ public:
         const double frame_duration_s = duration2double(_m_clock->now() - lastTime);
         const double fps              = 1.0 / frame_duration_s;
 
-        if (log_count > LOG_PERIOD) {
+        if (log_count >= LOG_PERIOD) {
             spdlog::get(name)->debug("Submitting frame to buffer {}, frametime: {}, FPS: {}", which_buffer, frame_duration_s,
                                      fps);
         }
@@ -195,7 +195,7 @@ public:
         which_buffer = !which_buffer;
 
 #ifndef NDEBUG
-        if (log_count > LOG_PERIOD) {
+        if (log_count >= LOG_PERIOD) {
             log_count = 0;
         } else {
             log_count++;
@@ -205,7 +205,7 @@ public:
 
 #ifndef NDEBUG
     size_t log_count  = 0;
-    size_t LOG_PERIOD = 20;
+    size_t LOG_PERIOD = 0; // <RTEN> log every output frame
 #endif
 
 private:
