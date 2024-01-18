@@ -111,7 +111,11 @@ public:
     void _p_one_iteration() override {
         // Essentially, XRWaitFrame.
         wait_vsync();
-
+#ifndef NDEBUG
+        // <RTEN>
+        [[maybe_unused]] time_point time_before_render = _m_clock->now();
+        // <RTEN/>
+#endif
         glUseProgram(demoShaderProgram);
         glBindFramebuffer(GL_FRAMEBUFFER, eyeTextureFBO);
 
@@ -200,6 +204,11 @@ public:
         } else {
             log_count++;
         }
+        // <RTEN>
+        [[maybe_unused]] time_point time_after_render = _m_clock->now();
+        double     time_duration         = duration2double<std::milli>(time_after_render - time_before_render);
+        spdlog::get(name)->debug("<RTEN> gldemo render time: {} ms", time_duration);
+        // <RTEN/>
 #endif
     }
 
