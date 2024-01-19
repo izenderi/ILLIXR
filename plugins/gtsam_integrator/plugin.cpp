@@ -176,7 +176,8 @@ private:
 #ifndef NDEBUG
         if (input_values->last_cam_integration_time > last_cam_time) {
             // <RTEN>
-            spdlog::get(name)->debug("New slow pose has arrived! cam_time: {}", input_values->last_cam_integration_time);
+            spdlog::get(name)->debug("New slow pose has arrived! cam_time: {}", 
+            duration2double<std::milli>(input_values->last_cam_integration_time - last_cam_time));
             // </RTEN>
             last_cam_time = input_values->last_cam_integration_time;
         }
