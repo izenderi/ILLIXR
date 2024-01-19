@@ -208,6 +208,12 @@ public:
         [[maybe_unused]] time_point time_after_render = _m_clock->now();
         double     time_duration         = duration2double<std::milli>(time_after_render - time_before_render);
         spdlog::get(name)->debug("<RTEN> gldemo render time: {} ms", time_duration);
+
+        // double c2d_lat = duration2double<std::milli>(time_after_render - begin_c2d_tp);
+        // spdlog::get(name)->debug("<RTEN> c2d: {} ms", c2d_lat);
+
+        spdlog::get(name)->debug("<RTEN> c2d end: {}", 
+                                duration2double<std::milli>(time_after_render.time_since_epoch()));
         // <RTEN/>
 #endif
     }

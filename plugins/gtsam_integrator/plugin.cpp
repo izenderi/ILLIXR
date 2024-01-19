@@ -178,6 +178,14 @@ private:
             // <RTEN>
             spdlog::get(name)->debug("New slow pose has arrived! cam_time: {}", 
             duration2double<std::milli>(input_values->last_cam_integration_time - last_cam_time));
+
+            // begin_c2d_tp = input_values->last_cam_integration_time;
+
+            spdlog::get(name)->debug("<RTEN> c2d begin: {}", 
+                                    duration2double<std::milli>(input_values->last_cam_integration_time.time_since_epoch()));
+
+            // spdlog::get(name)->debug("<RTEN> imui - cam: {}", 
+            // duration2double<std::milli>( _m_clock->now()- input_values->last_cam_integration_time));
             // </RTEN>
             last_cam_time = input_values->last_cam_integration_time;
         }
