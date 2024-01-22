@@ -921,8 +921,20 @@ public:
     }
 
     virtual void _p_one_iteration() override {
+        // <RTEN>
+        [[maybe_unused]] time_point time_before_warp = _m_clock->now();
+        // spdlog::get(name)->debug("<RTEN> timewarp_gl begin: {}", 
+        //                         duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+        // <RTEN/>
         switchboard::ptr<const rendered_frame> most_recent_frame = _m_eyebuffer.get_ro();
         warp(most_recent_frame);
+        // <RTEN>
+        [[maybe_unused]] time_point time_after_warp = _m_clock->now();
+        // spdlog::get(name)->debug("<RTEN> timewarp_gl end: {}", 
+        //                         duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+        spdlog::get(name)->debug("<RTEN> timewarp_gl time: {} ms", 
+                                duration2double<std::milli>(time_after_warp-time_before_warp));
+        // <RTEN/>
     }
 #endif
 

@@ -184,6 +184,10 @@ public:
         if (log_count >= LOG_PERIOD) {
             spdlog::get(name)->debug("Submitting frame to buffer {}, frametime: {}, FPS: {}", which_buffer, frame_duration_s,
                                      fps);
+            // <RTEN>
+            // spdlog::get(name)->debug("<RTEN> submitting time: {}", 
+            //                     duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+            // <RTEN/>
         }
 #endif
         lastTime = _m_clock->now();
