@@ -184,6 +184,8 @@ private:
             spdlog::get(name)->debug("<RTEN> c2d begin: {}", 
                                     duration2double<std::milli>(input_values->last_cam_integration_time.time_since_epoch()));
 
+            // spdlog::get(name)->debug("<RTEN> c2d begin now: {}", 
+            //                     duration2double<std::milli>(_m_clock->now().time_since_epoch()));
             // spdlog::get(name)->debug("<RTEN> imui - cam: {}", 
             // duration2double<std::milli>( _m_clock->now()- input_values->last_cam_integration_time));
             // </RTEN>

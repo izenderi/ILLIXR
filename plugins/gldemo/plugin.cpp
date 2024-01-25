@@ -110,10 +110,14 @@ public:
 
     void _p_one_iteration() override {
         // Essentially, XRWaitFrame.
+        spdlog::get(name)->debug("<RTEN> gldemo begin before vsync: {}", 
+                                duration2double<std::milli>(_m_clock->now().time_since_epoch()));
         wait_vsync();
 #ifndef NDEBUG
         // <RTEN>
         [[maybe_unused]] time_point time_before_render = _m_clock->now();
+        spdlog::get(name)->debug("<RTEN> gldemo begin after vsync: {}", 
+                                duration2double<std::milli>(_m_clock->now().time_since_epoch()));
         // <RTEN/>
 #endif
         glUseProgram(demoShaderProgram);
@@ -185,8 +189,8 @@ public:
             spdlog::get(name)->debug("Submitting frame to buffer {}, frametime: {}, FPS: {}", which_buffer, frame_duration_s,
                                      fps);
             // <RTEN>
-            // spdlog::get(name)->debug("<RTEN> submitting time: {}", 
-            //                     duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+            spdlog::get(name)->debug("<RTEN> submitting time: {}", 
+                                duration2double<std::milli>(_m_clock->now().time_since_epoch()));
             // <RTEN/>
         }
 #endif
