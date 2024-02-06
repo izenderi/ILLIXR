@@ -922,18 +922,26 @@ public:
 
     virtual void _p_one_iteration() override {
         // <RTEN>
-        [[maybe_unused]] time_point time_before_warp = _m_clock->now();
-        spdlog::get(name)->debug("<RTEN> timewarp_gl begin: {}", 
-                                duration2double<std::milli>(_m_clock->now().time_since_epoch()));
-        // <RTEN/>
-        switchboard::ptr<const rendered_frame> most_recent_frame = _m_eyebuffer.get_ro();
-        warp(most_recent_frame);
-        // <RTEN>
-        [[maybe_unused]] time_point time_after_warp = _m_clock->now();
-        spdlog::get(name)->debug("<RTEN> timewarp_gl end: {}", 
-                                duration2double<std::milli>(_m_clock->now().time_since_epoch()));
-        spdlog::get(name)->debug("<RTEN> timewarp_gl time: {} ms", 
-                                duration2double<std::milli>(time_after_warp-time_before_warp));
+        // if (atw_count < 150){ // make ATW only run n times before shut it down - at least showing the eye buffer
+            [[maybe_unused]] time_point time_before_warp = _m_clock->now();
+            spdlog::get(name)->debug("<RTEN> timewarp_gl begin: {}", 
+                                    duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+            // <RTEN/>
+            switchboard::ptr<const rendered_frame> most_recent_frame = _m_eyebuffer.get_ro();
+                
+            warp(most_recent_frame);
+                
+            // atw_count++;
+            
+            // std::this_thread::sleep_for(std::chrono::milliseconds(30)); // manual sleep to control load
+            
+            // <RTEN>
+            [[maybe_unused]] time_point time_after_warp = _m_clock->now();
+            spdlog::get(name)->debug("<RTEN> timewarp_gl end: {}", 
+                                    duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+            spdlog::get(name)->debug("<RTEN> timewarp_gl time: {} ms", 
+                                    duration2double<std::milli>(time_after_warp-time_before_warp));
+        // }
         // <RTEN/>
     }
 #endif
@@ -941,6 +949,7 @@ public:
 #ifndef NDEBUG
     size_t log_count  = 0;
     size_t LOG_PERIOD = 0; // <RTEN> log every output frame
+    size_t atw_count = 0; // <RTEN> count for warp execution
 #endif
 };
 
