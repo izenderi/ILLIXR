@@ -70,6 +70,11 @@ public:
     }
 
     void draw_GUI() {
+
+// <RTEN>
+        // pose_type r10_predicted_pose, r10_slow_pose, r10_fast_pose;
+// </RTEN>
+
         RAC_ERRNO_MSG("debugview at start of draw_GUI");
 
         // Start the Dear ImGui frame
@@ -128,6 +133,12 @@ public:
                         predicted_pose.position.y(), predicted_pose.position.z());
             ImGui::Text("Predicted pose quaternion (XYZW):\n  (%f, %f, %f, %f)", predicted_pose.orientation.x(),
                         predicted_pose.orientation.y(), predicted_pose.orientation.z(), predicted_pose.orientation.w());
+// <RTEN>
+            spdlog::get(name)->debug("<RTEN> Predicted pose position (XYZ): ({}, {}, {})", predicted_pose.position.x(),
+                        predicted_pose.position.y(), predicted_pose.position.z());
+            spdlog::get(name)->debug("<RTEN> Predicted pose quaternion (XYZW): ({}, {}, {}, {})", predicted_pose.orientation.x(),
+                        predicted_pose.orientation.y(), predicted_pose.orientation.z(), predicted_pose.orientation.w());
+// </RTEN>
         } else {
             ImGui::TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), "Invalid predicted pose pointer");
         }
@@ -148,6 +159,12 @@ public:
                         swapped_pose.position.z());
             ImGui::Text("Fast pose quaternion (XYZW):\n  (%f, %f, %f, %f)", swapped_pose.orientation.x(),
                         swapped_pose.orientation.y(), swapped_pose.orientation.z(), swapped_pose.orientation.w());
+// <RTEN>
+            spdlog::get(name)->debug("<RTEN> Fast pose position (XYZ): ({}, {}, {})", swapped_pose.position.x(), swapped_pose.position.y(),
+                                    swapped_pose.position.z());
+            spdlog::get(name)->debug("<RTEN> Fast pose quaternion (XYZW): ({}, {}, {}, {})", swapped_pose.orientation.x(),
+                            swapped_pose.orientation.y(), swapped_pose.orientation.z(), swapped_pose.orientation.w());
+// </RTEN>
         } else {
             ImGui::TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), "Invalid fast pose pointer");
         }
@@ -163,6 +180,12 @@ public:
                         swapped_pose.position.z());
             ImGui::Text("Slow pose quaternion (XYZW):\n  (%f, %f, %f, %f)", swapped_pose.orientation.x(),
                         swapped_pose.orientation.y(), swapped_pose.orientation.z(), swapped_pose.orientation.w());
+// <RTEN>
+            spdlog::get(name)->debug("<RTEN> Slow pose position (XYZ): ({}, {}, {})", swapped_pose.position.x(), swapped_pose.position.y(),
+                                    swapped_pose.position.z());
+            spdlog::get(name)->debug("<RTEN> Slow pose quaternion (XYZW): ({}, {}, {}, {})", swapped_pose.orientation.x(),
+                            swapped_pose.orientation.y(), swapped_pose.orientation.z(), swapped_pose.orientation.w());
+// </RTEN>
         } else {
             ImGui::TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), "Invalid slow pose pointer");
         }
@@ -177,6 +200,13 @@ public:
                         true_pose.position.z());
             ImGui::Text("Ground truth quaternion (XYZW):\n  (%f, %f, %f, %f)", true_pose.orientation.x(),
                         true_pose.orientation.y(), true_pose.orientation.z(), true_pose.orientation.w());
+// <RTEN>
+            spdlog::get(name)->debug("<RTEN> Ground truth position (XYZ): ({}, {}, {})", true_pose.position.x(), true_pose.position.y(),
+                            true_pose.position.z());
+            spdlog::get(name)->debug("<RTEN> Ground truth quaternion (XYZW): ({}, {}, {}, {})", true_pose.orientation.x(),
+                            true_pose.orientation.y(), true_pose.orientation.z(), true_pose.orientation.w());
+// </RTEN>
+
         } else {
             ImGui::TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), "Invalid ground truth pose pointer");
         }
