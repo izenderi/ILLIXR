@@ -853,7 +853,14 @@ public:
             spdlog::get(name)->debug("Prediction-to-display latency: {} ms", latency_ptd);
             spdlog::get(name)->debug("Render-to-display latency: {} ms", latency_rtd);
             spdlog::get(name)->debug("Next swap in: {} ms in the future", timewarp_estimate);
+// <RTEN>
+            // spdlog::get(name)->debug("ATW Position: ({}, {}, {}) | Orientation: ({}, {}, {}, {})", latest_pose.pose.position.x(),
+            //                         latest_pose.pose.position.y(), latest_pose.pose.position.z(),
+            //                         latest_pose.pose.orientation.w(),
+            //                         latest_pose.pose.orientation.x(), latest_pose.pose.orientation.y(),
+            //                         latest_pose.pose.orientation.z());
         }
+// <RTEN/>
     #endif
 
         // For now, it only makes sense to enable offloading in native mode
