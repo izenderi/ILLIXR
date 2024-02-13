@@ -246,6 +246,8 @@ private:
         spdlog::get(name)->debug("New Position (x, y, z) = {}, {}, {}", out_pose.x(), out_pose.y(), out_pose.z());
 
         //<RTEN>
+        // std::this_thread::sleep_for(std::chrono::microseconds(70)); // manual sleep to control load. 10 microsecond = 0.01ms, 12.5%
+
         [[maybe_unused]] time_point time_after = _m_clock->now();
         double     time_duration         = duration2double<std::milli>(time_after - time_before);
         spdlog::get(name)->debug("<RTEN> IMU Integration time: {} ms", time_duration);

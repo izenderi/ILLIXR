@@ -817,18 +817,26 @@ public:
         // Now that we have the most recent swap time, we can publish the new estimate.
         _m_vsync_estimate.put(_m_vsync_estimate.allocate<switchboard::event_wrapper<time_point>>(GetNextSwapTimeEstimate()));
 
-        std::chrono::nanoseconds imu_to_display     = time_last_swap - latest_pose.pose.sensor_time;
-        std::chrono::nanoseconds predict_to_display = time_last_swap - latest_pose.predict_computed_time;
-        std::chrono::nanoseconds render_to_display  = time_last_swap - most_recent_frame->render_time;
+        // <RTEN>
+        time_point latest_pose_time = latest_pose.pose.sensor_time;
+        time_point predict_time     = latest_pose.predict_computed_time;
+        time_point render_time      = most_recent_frame->render_time;
+
+        // std::this_thread::sleep_for(std::chrono::milliseconds(19)); // manual sleep to control load
+
+        std::chrono::nanoseconds imu_to_display     = _m_clock->now() - latest_pose_time;
+        std::chrono::nanoseconds predict_to_display = _m_clock->now() - predict_time;
+        std::chrono::nanoseconds render_to_display  = _m_clock->now() - render_time;
 
         mtp_logger.log(record{mtp_record,
                               {
                                   {iteration_no},
-                                  {time_last_swap},
+                                  {_m_clock->now()},
                                   {imu_to_display},
                                   {predict_to_display},
                                   {render_to_display},
                               }});
+        // <RTEN/>
 
     #ifndef NDEBUG // Timewarp only has vsync estimates if we're running with native-gl
 
@@ -939,8 +947,6 @@ public:
             warp(most_recent_frame);
                 
             // atw_count++;
-            
-            // std::this_thread::sleep_for(std::chrono::milliseconds(30)); // manual sleep to control load
             
             // <RTEN>
             [[maybe_unused]] time_point time_after_warp = _m_clock->now();
