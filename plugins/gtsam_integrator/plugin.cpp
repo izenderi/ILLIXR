@@ -15,6 +15,10 @@
 #include <thread>
 #include <utility>
 
+// <RTEN>
+#include <unistd.h> // getpid()
+// </RTEN>
+
 using namespace ILLIXR;
 // IMU sample time to live in seconds
 constexpr duration IMU_TTL{std::chrono::seconds{5}};
@@ -46,6 +50,10 @@ public:
                                      return in.abs();
                                  });
         }
+
+// <RTEN>
+        spdlog::get("illixr")->warn("[gtsam_integrator] pid: {}", getpid());
+// </RTEN>
     }
 
     void callback(const switchboard::ptr<const imu_type>& datum) {

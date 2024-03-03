@@ -8,6 +8,10 @@
 #include <memory>
 #include <thread>
 
+// <RTEN>
+#include <unistd.h> // getpid()
+// </RTEN>
+
 // clang-format off
 #include <eigen3/Eigen/Dense>
 #include <GL/glew.h> // GLEW has to be loaded before other GL libraries
@@ -498,6 +502,10 @@ private:
 
 public:
     void _setup() {
+// <RTEN>
+        spdlog::get("illixr")->warn("[timewarp_gl] pid: {}", getpid());
+// </RTEN>
+
         // Generate reference HMD and physical body dimensions
         HMD::GetDefaultHmdInfo(display_params::width_pixels, display_params::height_pixels, display_params::width_meters,
                                display_params::height_meters, display_params::lens_separation,
