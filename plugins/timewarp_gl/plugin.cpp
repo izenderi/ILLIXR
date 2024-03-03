@@ -822,7 +822,7 @@ public:
         time_point predict_time     = latest_pose.predict_computed_time;
         time_point render_time      = most_recent_frame->render_time;
 
-        // std::this_thread::sleep_for(std::chrono::milliseconds(19)); // manual sleep to control load
+        // std::this_thread::sleep_for(std::chrono::milliseconds(20)); // manual sleep to control load
 
         std::chrono::nanoseconds imu_to_display     = _m_clock->now() - latest_pose_time;
         std::chrono::nanoseconds predict_to_display = _m_clock->now() - predict_time;
