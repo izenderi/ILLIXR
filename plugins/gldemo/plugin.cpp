@@ -177,6 +177,10 @@ public:
             RAC_ERRNO_MSG("gldemo after glClear");
 
             demoscene.Draw();
+// <RTEN>
+            // std::this_thread::sleep_for(std::chrono::milliseconds(15)); // manual sleep to control load
+// <RTEN/>
+
         }
 
         glFinish();
