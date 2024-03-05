@@ -176,6 +176,10 @@ private:
 
     // Timestamp we are propagating the biases to (new IMU reading time)
     void propagate_imu_values(time_point real_time) {
+// <RTEN>
+if(imui_count++%10 == 0)
+{
+// </RTEN>
         auto input_values = _m_imu_integrator_input.get_ro_nullable();
         if (input_values == nullptr) {
             return;
@@ -300,6 +304,9 @@ private:
                          filters[5](navstate_k.velocity().array(), seconds_since_epoch), /// Velocity
                          new_quaternion,                                                 /// Eigen Quat
                          real_time}));
+// <RTEN>
+} // end of if imui_count++%10 == 0
+// </RTEN>
     }
 
     // Select IMU readings based on timestamp similar to how OpenVINS selects IMU values to propagate
@@ -351,6 +358,11 @@ private:
         return imu_type{timestamp, (1 - lambda) * imu_1.linear_a + lambda * imu_2.linear_a,
                         (1 - lambda) * imu_1.angular_v + lambda * imu_2.angular_v};
     }
+// <RTEN>
+#ifndef NDEBUG
+    size_t imui_count  = 0;
+#endif
+// </RTEN>
 };
 
 PLUGIN_MAIN(gtsam_integrator)
