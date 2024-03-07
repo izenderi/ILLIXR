@@ -686,10 +686,12 @@ public:
 
     void warp(switchboard::ptr<const rendered_frame> most_recent_frame) {
         if (!rendering_ready)
+        {
 // <RTEN>
             spdlog::get(name)->debug("Rendering not ready"); // signal of atw being blocked
 // </RTEN>
             _prepare_rendering();
+        }
         assert(this->image_handles_ready && rendering_ready);
         // Use the timewarp program
         glUseProgram(timewarpShaderProgram);
