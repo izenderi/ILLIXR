@@ -79,6 +79,9 @@ public:
                 img1,
             }));
         }
+        spdlog::get(name)->debug("<RTEN> c2d offline_cam begin: {}", 
+                                    duration2double<std::milli>(_m_rtc->now().time_since_epoch()));
+
         std::this_thread::sleep_for(std::chrono::nanoseconds(after_nearest_row->first - dataset_first_time -
                                                              _m_rtc->now().time_since_epoch().count() - 2));
     }
