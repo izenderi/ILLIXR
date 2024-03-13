@@ -490,7 +490,7 @@ private:
     // Get the estimated time of the next swap/next Vsync.
     // This is an estimate, used to wait until *just* before vsync.
     time_point GetNextSwapTimeEstimate() {
-        return time_last_swap + display_params::period;
+        return time_last_swap + display_params::atw_period;
     }
 
     // Get the estimated amount of time to put the CPU thread to sleep,
