@@ -862,6 +862,10 @@ public:
             const double     timewarp_estimate = duration2double<std::milli>(time_next_swap - time_last_swap);
 
             spdlog::get(name)->debug("Swap time: {} ms", time_swap);
+            // <RTEN>
+            spdlog::get(name)->debug("<RTEN> timewarp_gl GPU render time: {} ms", 
+                        duration2double<std::milli>(time_before_swap - gpu_start_wall_time)); // RTEN
+            // <RTEN/>
             spdlog::get(name)->debug("Motion-to-display latency: {} ms", latency_mtd);
             spdlog::get(name)->debug("Prediction-to-display latency: {} ms", latency_ptd);
             spdlog::get(name)->debug("Render-to-display latency: {} ms", latency_rtd);
