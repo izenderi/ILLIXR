@@ -750,7 +750,7 @@ public:
             glBindFramebuffer(GL_FRAMEBUFFER, _m_eye_framebuffers[eye]);
             glViewport(0, 0, display_params::width_pixels * 0.5, display_params::height_pixels);
             glClearColor(1.0, 1.0, 1.0, 1.0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // <RTEN> this line unlocks the frame
             glDepthFunc(GL_LEQUAL);
 
             [[maybe_unused]] const bool isTexture =
@@ -795,7 +795,7 @@ public:
             glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(num_distortion_indices), GL_UNSIGNED_INT, (void*) nullptr);
         }
 
-        glFinish();
+        glFinish(); // <RTEN> this line locks the frame
         glEndQuery(GL_TIME_ELAPSED);
 
 #ifdef ILLIXR_MONADO

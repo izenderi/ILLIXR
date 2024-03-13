@@ -173,7 +173,7 @@ public:
             glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
 
             RAC_ERRNO_MSG("gldemo before glClear");
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // <RTEN> this line unlocks the frame
             RAC_ERRNO_MSG("gldemo after glClear");
 
             demoscene.Draw();
@@ -183,7 +183,7 @@ public:
 
         }
 
-        glFinish();
+        glFinish(); // <RTEN> this line locks the frame
 
 #ifndef NDEBUG
         const double frame_duration_s = duration2double(_m_clock->now() - lastTime);
