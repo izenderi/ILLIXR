@@ -53,6 +53,15 @@ profile:
   enable_pre_sleep: false
 
 profile:
+  name: native_gl_zed
+  plugins: zed,gtsam_integrator,pose_prediction,gldemo,timewarp_gl,debugview,offload_data,audio_pipeline
+  visualizers: openvins
+  enable_offload: false
+  enable_alignment: false
+  enable_verbose_errors: false
+  enable_pre_sleep: false
+
+profile:
   name: native_vk
   plugins: offline_imu,offline_cam,gtsam_integrator,pose_prediction,display_vk,timewarp_vk,vkdemo,native_renderer,debugview
   visualizers: openvins
