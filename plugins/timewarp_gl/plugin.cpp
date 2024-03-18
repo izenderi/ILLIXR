@@ -828,7 +828,7 @@ public:
         [[maybe_unused]] time_point time_after_swap = time_last_swap;
 
         // Now that we have the most recent swap time, we can publish the new estimate.
-        _m_vsync_estimate.put(_m_vsync_estimate.allocate<switchboard::event_wrapper<time_point>>(GetNextSwapTimeEstimate()));
+        _m_vsync_estimate.put(_m_vsync_estimate.allocate<switchboard::event_wrapper<time_point>>(GetNextSwapTimeEstimate())); // <RTEN> vsync time update
 
         // <RTEN>
         time_point latest_pose_time = latest_pose.pose.sensor_time;
