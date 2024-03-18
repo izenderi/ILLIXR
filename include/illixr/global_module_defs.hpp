@@ -45,7 +45,7 @@ struct display_params {
     // Display refresh rate in Hz
     // <RTEN>
     static constexpr float frequency = 120.0f;
-    static constexpr float atw_frequency = 60.0f;
+    static constexpr float atw_frequency = 120.0f;
 
     // Display period in nanoseconds
     static constexpr duration period = freq2period(frequency);
