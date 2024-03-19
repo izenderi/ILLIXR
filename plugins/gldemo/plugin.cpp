@@ -53,8 +53,8 @@ public:
         time_point                                                     now        = _m_clock->now();
         time_point                                                     wait_time{};
 
-        // if (next_vsync == nullptr) { // Vanilla
-        if (true) { // <RTEN> 
+        if (next_vsync == nullptr) { // Vanilla
+        // if (true) { // <RTEN> 
             // If no vsync data available, just sleep for roughly a vsync period.
             // We'll get synced back up later.
             std::this_thread::sleep_for(display_params::period);
