@@ -11,6 +11,7 @@ using namespace ILLIXR;
 class pose_prediction : public phonebook::service {
 public:
     [[nodiscard]] virtual fast_pose_type     get_fast_pose() const                             = 0;
+    [[nodiscard]] virtual pose_type          get_slow_pose() const                             = 0;
     [[nodiscard]] virtual pose_type          get_true_pose() const                             = 0;
     [[nodiscard]] virtual fast_pose_type     get_fast_pose(time_point future_time) const       = 0;
     [[nodiscard]] virtual bool               fast_pose_reliable() const                        = 0;
