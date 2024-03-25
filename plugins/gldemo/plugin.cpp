@@ -53,8 +53,8 @@ public:
         time_point                                                     now        = _m_clock->now();
         time_point                                                     wait_time{};
 
-        if (next_vsync == nullptr) { // Vanilla
-        // if (true) { // <RTEN> 
+        // if (next_vsync == nullptr) { // Vanilla
+        if (true) { // <RTEN> 
             // If no vsync data available, just sleep for roughly a vsync period.
             // We'll get synced back up later.
             std::this_thread::sleep_for(display_params::period);
@@ -110,10 +110,13 @@ public:
     }
 
     void _p_one_iteration() override {
+// if (++gldemo_count < 200)
+// {
         // Essentially, XRWaitFrame.
         spdlog::get(name)->debug("<RTEN> gldemo begin before vsync: {}", 
                                 duration2double<std::milli>(_m_clock->now().time_since_epoch()));
         wait_vsync();
+        const pose_type cam_vio_pose  = pp->get_slow_pose(); // <RTEN>
 #ifndef NDEBUG
         // <RTEN>
         [[maybe_unused]] time_point time_before_render = _m_clock->now();
@@ -189,6 +192,8 @@ public:
 #ifndef NDEBUG
         const double frame_duration_s = duration2double(_m_clock->now() - lastTime);
         const double fps              = 1.0 / frame_duration_s;
+        time_point cam_vio_pose_time = cam_vio_pose.sensor_time; // <RTEN>
+        std::chrono::nanoseconds cam_vio_to_display = _m_clock->now() - cam_vio_pose_time; // <RTEN>
 
         if (log_count >= LOG_PERIOD) {
             spdlog::get(name)->debug("Submitting frame to buffer {}, frametime: {}, FPS: {}", which_buffer, frame_duration_s,
@@ -196,6 +201,8 @@ public:
             // <RTEN>
             spdlog::get(name)->debug("<RTEN> submitting time: {}", 
                                 duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+            spdlog::get(name)->debug("<RTEN> C2D end of gldemo: {}",
+                                duration2double<std::milli>(cam_vio_to_display));
             // <RTEN/>
         }
 #endif
@@ -225,15 +232,17 @@ public:
         // double c2d_lat = duration2double<std::milli>(time_after_render - begin_c2d_tp);
         // spdlog::get(name)->debug("<RTEN> c2d: {} ms", c2d_lat);
 
-        spdlog::get(name)->debug("<RTEN> c2d end: {}", 
-                                duration2double<std::milli>(time_after_render.time_since_epoch()));
+        // spdlog::get(name)->debug("<RTEN> c2d end: {}", 
+        //                         duration2double<std::milli>(time_after_render.time_since_epoch()));
         // <RTEN/>
 #endif
+// } // <RTEN/> End of if (gldemo_count < 200)
     }
 
 #ifndef NDEBUG
     size_t log_count  = 0;
     size_t LOG_PERIOD = 0; // <RTEN> log every output frame
+    size_t gldemo_count = 0; // <RTEN>
 #endif
 
 private:
