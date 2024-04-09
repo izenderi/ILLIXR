@@ -87,7 +87,8 @@ public:
         , _m_signal_quad{sb->get_writer<signal_to_quad>("signal_quad")}
 #endif
         , timewarp_gpu_logger{record_logger_}
-        , _m_hologram{sb->get_writer<hologram_input>("hologram_in")} {
+        , _m_hologram{sb->get_writer<hologram_input>("hologram_in")} 
+        , _m_signal_gldemo_finished{sb->get_reader<signal_to_gldemo_finished>("signal_to_gldemo_finished")} {
         spdlogger(std::getenv("TIMEWARP_GL_LOG_LEVEL"));
 #ifndef ILLIXR_MONADO
         const std::shared_ptr<xlib_gl_extended_window> xwin = pb->lookup_impl<xlib_gl_extended_window>();
@@ -221,6 +222,7 @@ private:
 
     // Switchboard plug for application eye buffer.
     switchboard::reader<rendered_frame> _m_eyebuffer;
+    switchboard::reader<signal_to_gldemo_finished> _m_signal_gldemo_finished;
 
     // Switchboard plug for publishing vsync estimates
     switchboard::writer<switchboard::event_wrapper<time_point>> _m_vsync_estimate;
@@ -938,7 +940,7 @@ public:
         // Scheduling granularity can't be assumed to be super accurate here,
         // so don't push your luck (i.e. don't wait too long....) Tradeoff with
         // MTP here. More you wait, closer to the display sync you sample the pose.
-        std::this_thread::sleep_for(EstimateTimeToSleep(DELAY_FRACTION));
+        // std::this_thread::sleep_for(EstimateTimeToSleep(DELAY_FRACTION));
         if (image_handles_ready.load() && _m_eyebuffer.get_ro_nullable() != nullptr) {
             return skip_option::run;
         } else {
@@ -960,6 +962,16 @@ public:
                                     duration2double<std::milli>(_m_clock->now().time_since_epoch()));
             // <RTEN/>
             switchboard::ptr<const rendered_frame> most_recent_frame = _m_eyebuffer.get_ro();
+            switchboard::ptr<const signal_to_gldemo_finished> signal = _m_signal_gldemo_finished.get_ro();
+            // if (signal != nullptr) {
+            //     spdlog::get(name)->debug("<RTEN> gldemo_finished {}", 
+            //                         signal->gldemo_finished);
+            // }
+
+            while (!signal->gldemo_finished)
+            {
+                signal = _m_signal_gldemo_finished.get_ro();
+            }
                 
             warp(most_recent_frame);
                 

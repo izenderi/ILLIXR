@@ -210,6 +210,15 @@ struct signal_to_quad : public switchboard::event {
         : seq{seq_} { }
 };
 
+struct signal_to_gldemo_finished : public switchboard::event {
+    bool gldemo_finished;
+
+    signal_to_gldemo_finished() = default;
+
+    signal_to_gldemo_finished(bool gldemo_finished_)
+        : gldemo_finished{gldemo_finished_} { }
+};
+
 // High-level HMD specification, timewarp plugin
 // may/will calculate additional HMD info based on these specifications
 struct hmd_physical_info {

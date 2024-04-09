@@ -43,7 +43,8 @@ public:
         , _m_clock{pb->lookup_impl<RelativeClock>()}
         , _m_vsync{sb->get_reader<switchboard::event_wrapper<time_point>>("vsync_estimate")}
         , _m_image_handle{sb->get_writer<image_handle>("image_handle")}
-        , _m_eyebuffer{sb->get_writer<rendered_frame>("eyebuffer")} {
+        , _m_eyebuffer{sb->get_writer<rendered_frame>("eyebuffer")}
+        , _m_signal_to_gldemo_finished{sb->get_writer<signal_to_gldemo_finished>("signal_to_gldemo_finished")} {
         spdlogger(std::getenv("GLDEMO_LOG_LEVEL"));
     }
 
@@ -102,6 +103,7 @@ public:
 
     void _p_thread_setup() override {
         lastTime = _m_clock->now();
+        _m_signal_to_gldemo_finished.put(_m_signal_to_gldemo_finished.allocate<signal_to_gldemo_finished>(signal_to_gldemo_finished{true}));
 
         // Note: glXMakeContextCurrent must be called from the thread which will be using it.
         [[maybe_unused]] const bool gl_result = static_cast<bool>(glXMakeCurrent(xwin->dpy, xwin->win, xwin->glc));
@@ -118,6 +120,7 @@ public:
         [[maybe_unused]] time_point time_before_render = _m_clock->now();
         spdlog::get(name)->debug("<RTEN> gldemo begin after vsync: {}", 
                                 duration2double<std::milli>(_m_clock->now().time_since_epoch()));
+        _m_signal_to_gldemo_finished.put(_m_signal_to_gldemo_finished.allocate<signal_to_gldemo_finished>(signal_to_gldemo_finished{false}));
         // <RTEN/>
 #endif
         glUseProgram(demoShaderProgram);
@@ -210,6 +213,9 @@ public:
 
         which_buffer = !which_buffer;
 
+        // Signal to the main thread that we're done rendering
+        _m_signal_to_gldemo_finished.put(_m_signal_to_gldemo_finished.allocate<signal_to_gldemo_finished>(signal_to_gldemo_finished{true}));
+
 #ifndef NDEBUG
         if (log_count >= LOG_PERIOD) {
             log_count = 0;
@@ -248,6 +254,7 @@ private:
     // correct eye/framebuffer in the "swapchain".
     switchboard::writer<image_handle>   _m_image_handle;
     switchboard::writer<rendered_frame> _m_eyebuffer;
+    switchboard::writer<signal_to_gldemo_finished> _m_signal_to_gldemo_finished;
 
     GLuint eyeTextures[2]{};
     GLuint eyeTextureFBO{};
