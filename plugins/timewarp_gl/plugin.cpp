@@ -523,7 +523,7 @@ public:
         // set swap interval for 1
         // TODO do we still need this if timewarp is not doing the presenting?
         auto glXSwapIntervalEXT = (glXSwapIntervalEXTProc) glXGetProcAddressARB((const GLubyte*) "glXSwapIntervalEXT");
-        glXSwapIntervalEXT(dpy, root, 1);
+        glXSwapIntervalEXT(dpy, root, 0); // <RTEN> Disable Vysnc
 
         // Init and verify GLEW
         glewExperimental      = GL_TRUE;
@@ -940,7 +940,7 @@ public:
         // Scheduling granularity can't be assumed to be super accurate here,
         // so don't push your luck (i.e. don't wait too long....) Tradeoff with
         // MTP here. More you wait, closer to the display sync you sample the pose.
-        // std::this_thread::sleep_for(EstimateTimeToSleep(DELAY_FRACTION));
+        std::this_thread::sleep_for(EstimateTimeToSleep(DELAY_FRACTION));
         if (image_handles_ready.load() && _m_eyebuffer.get_ro_nullable() != nullptr) {
             return skip_option::run;
         } else {
