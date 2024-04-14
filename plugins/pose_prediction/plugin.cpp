@@ -34,6 +34,21 @@ public:
         }
     }
 
+    // <RTEN>
+    // get slow pose if available, otherwise return 0
+    pose_type get_slow_pose() const override {
+
+        switchboard::ptr<const pose_type> slow_pose = _m_slow_pose.get_ro_nullable();
+        if (slow_pose == nullptr) {
+            // No slow pose, return 0
+            return correct_pose(pose_type{});
+        }
+        else {
+            return correct_pose(*slow_pose);
+        }
+    }
+    // </RTEN>
+
     pose_type get_true_pose() const override {
         switchboard::ptr<const pose_type>                                   pose_ptr = _m_true_pose.get_ro_nullable();
         switchboard::ptr<const switchboard::event_wrapper<Eigen::Vector3f>> offset_ptr =
