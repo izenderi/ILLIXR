@@ -709,6 +709,8 @@ public:
         Eigen::Matrix4f viewMatrixEnd   = Eigen::Matrix4f::Identity();
 
         const fast_pose_type latest_pose  = disable_warp ? most_recent_frame->render_pose : pp->get_fast_pose();
+        const pose_type cam_vio_pose  = pp->get_slow_pose(); // <RTEN> get the slow pose
+
         viewMatrixBegin.block(0, 0, 3, 3) = latest_pose.pose.orientation.toRotationMatrix();
 
         // TODO: We set the "end" pose to the same as the beginning pose, but this really should be the pose for
@@ -832,12 +834,14 @@ public:
 
         // <RTEN>
         time_point latest_pose_time = latest_pose.pose.sensor_time;
+        time_point cam_vio_pose_time = cam_vio_pose.sensor_time; // <RTEN>
         time_point predict_time     = latest_pose.predict_computed_time;
         time_point render_time      = most_recent_frame->render_time;
 
         // std::this_thread::sleep_for(std::chrono::milliseconds(19)); // manual sleep to control load
 
         std::chrono::nanoseconds imu_to_display     = _m_clock->now() - latest_pose_time;
+        std::chrono::nanoseconds cam_vio_to_display = _m_clock->now() - cam_vio_pose_time; // <RTEN>
         std::chrono::nanoseconds predict_to_display = _m_clock->now() - predict_time;
         std::chrono::nanoseconds render_to_display  = _m_clock->now() - render_time;
 
@@ -856,17 +860,17 @@ public:
         if (log_count >= LOG_PERIOD) {
             const double     time_swap         = duration2double<std::milli>(time_after_swap - time_before_swap);
             const double     latency_mtd       = duration2double<std::milli>(imu_to_display);
+            const double     latency_ctd       = duration2double<std::milli>(cam_vio_to_display); // <RTEN>
             const double     latency_ptd       = duration2double<std::milli>(predict_to_display);
             const double     latency_rtd       = duration2double<std::milli>(render_to_display);
             const time_point time_next_swap    = GetNextSwapTimeEstimate();
             const double     timewarp_estimate = duration2double<std::milli>(time_next_swap - time_last_swap);
 
             spdlog::get(name)->debug("Swap time: {} ms", time_swap);
-            // <RTEN>
-            spdlog::get(name)->debug("<RTEN> timewarp_gl GPU render time: {} ms", 
-                        duration2double<std::milli>(time_before_swap - gpu_start_wall_time)); // RTEN
-            // <RTEN/>
+            spdlog::get(name)->debug("timewarp_gl GPU render time: {} ms", 
+                        duration2double<std::milli>(time_before_swap - gpu_start_wall_time)); // <RTEN>
             spdlog::get(name)->debug("Motion-to-display latency: {} ms", latency_mtd);
+            spdlog::get(name)->debug("Camera-to-display latency: {} ms", latency_ctd); // <RTEN>
             spdlog::get(name)->debug("Prediction-to-display latency: {} ms", latency_ptd);
             spdlog::get(name)->debug("Render-to-display latency: {} ms", latency_rtd);
             spdlog::get(name)->debug("Next swap in: {} ms in the future", timewarp_estimate);
