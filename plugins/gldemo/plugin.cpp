@@ -50,28 +50,44 @@ public:
         spdlogger(std::getenv("GLDEMO_LOG_LEVEL"));
     }
 
-    float calculate_fr_r(){
-
+    float calculate_fr_r(int n){
+        float fr_r = 1.0f;
+        if (n < num_init) {
+            return fr_r;
+        }
+        float numerator = alpha_value * slope_C;
+        float denominator = alpha_value * slope_C + (1 - alpha_value) * slope_M + (1/slope_K) * (n-num_init);
+        fr_r = numerator / denominator;
+        return fr_r;
     }
 
-    float calculate_visible_vertices(objects){
-        int visibleVertices = 0;
-        for (const auto& object : objects) {
-            for (const auto& vertex : object.vertices) {
-                // Transform the vertex by the model-view-projection matrix
-                Eigen::Vector4f clipSpaceVertex = modelViewProjectionMatrix * vertex;
+    int calculate_visible_vertices(Eigen::Matrix4f modelViewMatrix) {
+    int visibleVertices = 0;
+    for (const auto& object : demoscene.objects) {
+        if (object.num_triangles > 0) {
+            glBindBuffer(GL_ARRAY_BUFFER, object.vbo_handle);
+            vertex_t* verts = (vertex_t*) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+            if (verts != nullptr) {
+                // int numVertices = object.num_triangles * 3; // Assuming each triangle has 3 vertices
+                for (int i = 0; i < object.num_triangles; i+=10000) {
+                    // Transform the vertex by the model-view-projection matrix
+                    Eigen::Vector4f clipSpaceVertex = modelViewMatrix * Eigen::Vector4f(verts[i].position[0], verts[i].position[1], verts[i].position[2], 1.0f);
 
-                // Perform perspective division
-                Eigen::Vector3f ndcSpaceVertex = clipSpaceVertex.hnormalized();
+                    // Perform perspective division
+                    Eigen::Vector3f ndcSpaceVertex = clipSpaceVertex.hnormalized();
 
-                // Check if the vertex is within the viewport
-                if (ndcSpaceVertex.x() >= -1.0f && ndcSpaceVertex.x() <= 1.0f &&
-                    ndcSpaceVertex.y() >= -1.0f && ndcSpaceVertex.y() <= 1.0f) {
-                    visibleVertices++;
+                    // Check if the vertex is within the viewport
+                    if (ndcSpaceVertex.x() >= -1.0f && ndcSpaceVertex.x() <= 1.0f &&
+                        ndcSpaceVertex.y() >= -1.0f && ndcSpaceVertex.y() <= 1.0f) {
+                        visibleVertices++;
+                    }
                 }
+                glUnmapBuffer(GL_ARRAY_BUFFER);
             }
         }
     }
+    return visibleVertices;
+}
 
     // Essentially, a crude equivalent of XRWaitFrame.
     void wait_vsync() {
@@ -135,13 +151,13 @@ public:
         assert(gl_result && "glXMakeCurrent should not fail");
 
 // <RTEN> Initialize the parameters
-        fr_r = 0.9f;
+        fr_r = 1.0f;
         alpha_value = 0.5;
-        num_init = 20000;
+        num_init = 3;
         slope_C = 3.7547;   
         slope_M = 0.1903;  
-        slope_K = 11650;
-        n = 20000;
+        slope_K = 3;
+        n = 3;
 // <RTEN/>           
     }
 
@@ -180,24 +196,6 @@ public:
         // Excessive? Maybe.
         constexpr int LEFT_EYE = 0;
 
-// <RTEN>
-        // Calculate the dimensions of the central region
-        int centralWidth = display_params::width_pixels * fr_r;
-        int centralHeight = display_params::height_pixels * fr_r;
-
-        // Calculate the lower-left corner of the central region
-        int x = (display_params::width_pixels - centralWidth) * fr_r;
-        int y = (display_params::height_pixels - centralHeight) * fr_r;
-
-        // Set the viewport to the central region
-        glViewport(x, y, centralWidth, centralHeight);
-
-        // Adjust the projection matrix to match the new viewport
-        Eigen::Matrix4f centralProjection = basicProjection;
-        centralProjection(0, 0) /= fr_r; // Scale the x-axis
-        centralProjection(1, 1) /= fr_r; // Scale the y-axis
-// </RTEN>
-
         for (auto eye_idx = 0; eye_idx < 2; eye_idx++) {
             // Offset of eyeball from pose
             auto eyeball =
@@ -221,6 +219,28 @@ public:
             // using fresh pose data, if we have any.
             Eigen::Matrix4f modelViewMatrix = view_matrix * modelMatrix;
             glUniformMatrix4fv(static_cast<GLint>(modelViewAttr), 1, GL_FALSE, (GLfloat*) (modelViewMatrix.data()));
+
+            
+// <RTEN>
+            n = calculate_visible_vertices(modelViewMatrix);
+            fr_r = calculate_fr_r(n);
+            // Calculate the dimensions of the central region
+            int centralWidth = display_params::width_pixels * fr_r;
+            int centralHeight = display_params::height_pixels * fr_r;
+
+            // Calculate the lower-left corner of the central region
+            int x = (display_params::width_pixels - centralWidth) * fr_r;
+            int y = (display_params::height_pixels - centralHeight) * fr_r;
+
+            // Set the viewport to the central region
+            glViewport(x, y, centralWidth, centralHeight);
+
+            // Adjust the projection matrix to match the new viewport
+            Eigen::Matrix4f centralProjection = basicProjection;
+            centralProjection(0, 0) /= fr_r; // Scale the x-axis
+            centralProjection(1, 1) /= fr_r; // Scale the y-axis
+// </RTEN>
+
             // glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (basicProjection.data()));
             glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (centralProjection.data())); // <RTEN>
 
@@ -289,7 +309,10 @@ public:
         spdlog::get(name)->debug("<RTEN> demoscene objects number: {}", demoscene.objects.size());
 
         // print the viewport number of vertices
-        
+        spdlog::get(name)->debug("<RTEN> number of visible vertices: {}", n);
+
+        // print fr_r
+        spdlog::get(name)->debug("<RTEN> fr_r: {}", fr_r);
 
         // spdlog::get(name)->debug("<RTEN> c2d end: {}", );
         // <RTEN/>
