@@ -26,6 +26,7 @@ struct object_t {
     GLuint num_triangles;
     GLuint texture;
     bool   has_texture;
+    GLfloat center[3]; // <RTEN> center of object
 
     void Draw() const {
         RAC_ERRNO_MSG("gl_util/obj at start of Draw");
@@ -242,6 +243,51 @@ public:
                 obj.Draw();
             }
         }
+    }
+
+    // Calculate the centroid of an object
+    // Eigen::Vector3f calculateObjectCentroid(auto obj) {
+    //     Eigen::Vector3f centroid = Eigen::Vector3f::Zero();
+    //     size_t          num_verts = 0;
+
+    //     for (size_t i = 0; i < obj.num_triangles * 3; i++) {
+    //         centroid += Eigen::Vector3f(verts[i].position[0], verts[i].position[1], verts[i].position[2]);
+    //     }
+
+    //     return centroid / num_verts;
+    // }
+
+
+    Eigen::Vector3f calculateCentroid() {
+        Eigen::Vector3f centroid = Eigen::Vector3f::Zero();
+        size_t          num_verts = 0;
+
+        for (auto obj : objects) {
+            if (obj.num_triangles > 0) {
+                num_verts += obj.num_triangles * 3;
+            }
+        }
+
+        if (num_verts == 0) {
+            return centroid;
+        }
+
+        for (auto obj : objects) {
+            if (obj.num_triangles > 0) {
+                glBindBuffer(GL_ARRAY_BUFFER, obj.vbo_handle);
+                vertex_t* verts = (vertex_t*) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+
+                // for (size_t i = 0; i < obj.num_triangles * 3; i++) {
+                //     centroid += Eigen::Vector3f(verts[i].position[0], verts[i].position[1], verts[i].position[2]);
+                // }
+                
+                centroid += Eigen::Vector3f(verts[0].position[0], verts[0].position[1], verts[0].position[2]);
+
+                glUnmapBuffer(GL_ARRAY_BUFFER);
+            }
+        }
+
+        return centroid / num_verts;
     }
 
     bool successfully_loaded_model   = false;

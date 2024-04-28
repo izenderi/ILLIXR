@@ -15,6 +15,11 @@
 namespace ILLIXR {
 using ullong = unsigned long long;
 
+// <RTEN>
+extern float fr_r;
+
+// </RTEN>
+
 struct imu_type : switchboard::event {
     time_point      time;
     Eigen::Vector3d angular_v;

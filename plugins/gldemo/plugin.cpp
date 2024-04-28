@@ -28,6 +28,8 @@ using namespace ILLIXR;
 // Wake up 1 ms after vsync instead of exactly at vsync to account for scheduling uncertainty
 static constexpr std::chrono::milliseconds VSYNC_SAFETY_DELAY{1};
 
+float ILLIXR::fr_r = 0.0f;
+
 class gldemo : public threadloop {
 public:
     // Public constructor, create_component passes Switchboard handles ("plugs")
@@ -46,6 +48,29 @@ public:
         , _m_eyebuffer{sb->get_writer<rendered_frame>("eyebuffer")}
         , _m_signal_to_gldemo_finished{sb->get_writer<signal_to_gldemo_finished>("signal_to_gldemo_finished")} {
         spdlogger(std::getenv("GLDEMO_LOG_LEVEL"));
+    }
+
+    float calculate_fr_r(){
+
+    }
+
+    float calculate_visible_vertices(objects){
+        int visibleVertices = 0;
+        for (const auto& object : objects) {
+            for (const auto& vertex : object.vertices) {
+                // Transform the vertex by the model-view-projection matrix
+                Eigen::Vector4f clipSpaceVertex = modelViewProjectionMatrix * vertex;
+
+                // Perform perspective division
+                Eigen::Vector3f ndcSpaceVertex = clipSpaceVertex.hnormalized();
+
+                // Check if the vertex is within the viewport
+                if (ndcSpaceVertex.x() >= -1.0f && ndcSpaceVertex.x() <= 1.0f &&
+                    ndcSpaceVertex.y() >= -1.0f && ndcSpaceVertex.y() <= 1.0f) {
+                    visibleVertices++;
+                }
+            }
+        }
     }
 
     // Essentially, a crude equivalent of XRWaitFrame.
@@ -108,6 +133,16 @@ public:
         // Note: glXMakeContextCurrent must be called from the thread which will be using it.
         [[maybe_unused]] const bool gl_result = static_cast<bool>(glXMakeCurrent(xwin->dpy, xwin->win, xwin->glc));
         assert(gl_result && "glXMakeCurrent should not fail");
+
+// <RTEN> Initialize the parameters
+        fr_r = 0.9f;
+        alpha_value = 0.5;
+        num_init = 20000;
+        slope_C = 3.7547;   
+        slope_M = 0.1903;  
+        slope_K = 11650;
+        n = 20000;
+// <RTEN/>           
     }
 
     void _p_one_iteration() override {
@@ -128,7 +163,7 @@ public:
 
         glUseProgram(demoShaderProgram);
         glBindVertexArray(demo_vao);
-        glViewport(0, 0, display_params::width_pixels, display_params::height_pixels);
+        // glViewport(0, 0, display_params::width_pixels, display_params::height_pixels);
 
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
@@ -144,6 +179,24 @@ public:
 
         // Excessive? Maybe.
         constexpr int LEFT_EYE = 0;
+
+// <RTEN>
+        // Calculate the dimensions of the central region
+        int centralWidth = display_params::width_pixels * fr_r;
+        int centralHeight = display_params::height_pixels * fr_r;
+
+        // Calculate the lower-left corner of the central region
+        int x = (display_params::width_pixels - centralWidth) * fr_r;
+        int y = (display_params::height_pixels - centralHeight) * fr_r;
+
+        // Set the viewport to the central region
+        glViewport(x, y, centralWidth, centralHeight);
+
+        // Adjust the projection matrix to match the new viewport
+        Eigen::Matrix4f centralProjection = basicProjection;
+        centralProjection(0, 0) /= fr_r; // Scale the x-axis
+        centralProjection(1, 1) /= fr_r; // Scale the y-axis
+// </RTEN>
 
         for (auto eye_idx = 0; eye_idx < 2; eye_idx++) {
             // Offset of eyeball from pose
@@ -168,7 +221,8 @@ public:
             // using fresh pose data, if we have any.
             Eigen::Matrix4f modelViewMatrix = view_matrix * modelMatrix;
             glUniformMatrix4fv(static_cast<GLint>(modelViewAttr), 1, GL_FALSE, (GLfloat*) (modelViewMatrix.data()));
-            glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (basicProjection.data()));
+            // glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (basicProjection.data()));
+            glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (centralProjection.data())); // <RTEN>
 
             glBindTexture(GL_TEXTURE_2D, eyeTextures[eye_idx]);
             glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, eyeTextures[eye_idx], 0);
@@ -181,6 +235,7 @@ public:
 
             demoscene.Draw();
 // <RTEN>
+            Eigen::Vector3f centroid = demoscene.calculateCentroid();
             // std::this_thread::sleep_for(std::chrono::milliseconds(15)); // manual sleep to control load
 // <RTEN/>
 
@@ -230,8 +285,13 @@ public:
         // double c2d_lat = duration2double<std::milli>(time_after_render - begin_c2d_tp);
         // spdlog::get(name)->debug("<RTEN> c2d: {} ms", c2d_lat);
 
-        spdlog::get(name)->debug("<RTEN> c2d end: {}", 
-                                duration2double<std::milli>(time_after_render.time_since_epoch()));
+        // print demoscene objects number
+        spdlog::get(name)->debug("<RTEN> demoscene objects number: {}", demoscene.objects.size());
+
+        // print the viewport number of vertices
+        
+
+        // spdlog::get(name)->debug("<RTEN> c2d end: {}", );
         // <RTEN/>
 #endif
     }
@@ -277,6 +337,13 @@ private:
     Eigen::Matrix4f basicProjection;
 
     time_point lastTime{};
+
+    float alpha_value = 0.0;      // Example trade-off weight
+    int num_init = 0;             // Initial number of vertices
+    float slope_C = 0.0;          // Derived coefficient for time improvement
+    float slope_M = 0.0;          // Derived coefficient for quality degradation
+    float slope_K = 0.0;          // Example scaling factor for number of vertices
+    int n = 0;                    // Current number of vertices
 
     static void createSharedEyebuffer(GLuint* texture_handle) {
         // Create the shared eye texture handle

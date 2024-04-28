@@ -28,3 +28,5 @@ openxr_launch.csh
 openxr_launch.sh
 
 .vscode/
+
+*.log
