@@ -196,7 +196,12 @@ public:
         // Excessive? Maybe.
         constexpr int LEFT_EYE = 0;
 
+        double     time_overhead = 0.0;
+        double     time_srr = 0.0;
+
+        [[maybe_unused]] time_point time_before_srr = _m_clock->now();
         for (auto eye_idx = 0; eye_idx < 2; eye_idx++) {
+
             // Offset of eyeball from pose
             auto eyeball =
                 Eigen::Vector3f((eye_idx == LEFT_EYE ? -display_params::ipd / 2.0f : display_params::ipd / 2.0f), 0, 0);
@@ -222,6 +227,10 @@ public:
 
             
 // <RTEN>
+            [[maybe_unused]] time_point overhead_start = _m_clock->now();
+
+            Eigen::Vector3f centroid = demoscene.calculateCentroid();
+
             n = calculate_visible_vertices(modelViewMatrix);
             fr_r = calculate_fr_r(n);
             // Calculate the dimensions of the central region
@@ -239,8 +248,10 @@ public:
             Eigen::Matrix4f centralProjection = basicProjection;
             centralProjection(0, 0) /= fr_r; // Scale the x-axis
             centralProjection(1, 1) /= fr_r; // Scale the y-axis
-// </RTEN>
 
+            time_overhead += duration2double<std::milli>(_m_clock->now() - overhead_start);
+// </RTEN>
+            
             // glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (basicProjection.data()));
             glUniformMatrix4fv(static_cast<GLint>(projectionAttr), 1, GL_FALSE, (GLfloat*) (centralProjection.data())); // <RTEN>
 
@@ -254,14 +265,12 @@ public:
             RAC_ERRNO_MSG("gldemo after glClear");
 
             demoscene.Draw();
-// <RTEN>
-            Eigen::Vector3f centroid = demoscene.calculateCentroid();
-            // std::this_thread::sleep_for(std::chrono::milliseconds(15)); // manual sleep to control load
-// <RTEN/>
+            
 
         }
 
         glFinish(); // <RTEN> this line locks the frame
+        time_srr += duration2double<std::milli>(_m_clock->now() - time_before_srr);
 
 #ifndef NDEBUG
         const double frame_duration_s = duration2double(_m_clock->now() - lastTime);
@@ -315,6 +324,12 @@ public:
         spdlog::get(name)->debug("<RTEN> fr_r: {}", fr_r);
 
         // spdlog::get(name)->debug("<RTEN> c2d end: {}", );
+
+        // print the time overhead
+        spdlog::get(name)->debug("<RTEN> time overhead: {} ms", time_overhead);
+
+        // print the time spent in SRR
+        spdlog::get(name)->debug("<RTEN> time spent in SRR: {} ms", time_srr);
         // <RTEN/>
 #endif
     }
