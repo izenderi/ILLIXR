@@ -8,6 +8,11 @@
 #include <filesystem>
 #include <shared_mutex>
 
+#include <fstream>       // For std::ofstream
+#include <iostream>      // For std::cerr
+#include <iomanip>       // For std::setprecision
+#include <utility>       // For std::move (if needed)
+
 using namespace ILLIXR;
 
 class pose_prediction_impl : public pose_prediction {
@@ -108,6 +113,30 @@ public:
                 first_time = false;
                 offset     = predicted_pose.orientation.inverse();
             }
+        }
+
+        // Prepare [x1, x2, x3, x4, x5, x6, x7] array
+        Eigen::Vector3f pos = predicted_pose.position;
+        Eigen::Quaternionf ori = predicted_pose.orientation;
+
+        float x1 = pos.x();
+        float x2 = pos.y();
+        float x3 = pos.z();
+        float x4 = ori.w();
+        float x5 = ori.x();
+        float x6 = ori.y();
+        float x7 = ori.z();
+
+        // Open the file in write mode (overwrite if exists, create if not)
+        std::ofstream pose_file("fast_pose_data.txt", std::ios_base::out);  // Open in write mode, overwrite
+        if (pose_file.is_open()) {
+            // Write the formatted output to the file
+            pose_file << std::fixed << std::setprecision(6)
+                    << "[" << x1 << ", " << x2 << ", " << x3 << ", "
+                    << x4 << ", " << x5 << ", " << x6 << ", " << x7 << "]\n";
+            pose_file.close();
+        } else {
+            std::cerr << "Unable to open file to write pose data." << std::endl;
         }
 
         // Several timestamps are logged:
