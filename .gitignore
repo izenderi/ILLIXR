@@ -29,3 +29,7 @@ openxr_launch.sh
 
 # added
 fast_pose_data.txt
+
+
+# MacOS
+.DS_Store

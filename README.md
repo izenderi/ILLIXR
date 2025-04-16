@@ -1,3 +1,5 @@
+> This is the TREX2 implementation repo for ILLIXR 3.0. For the TREX2 repo please visit: https://github.com/rtenlab/trex2
+
 # ILLIXR
 
 ## This is a modifeid version for TeleXR implementation
